@@ -74,5 +74,5 @@ int questionmatch(char *obj, char *pat, int n)
 
 void freemyglob(struct filematch *pt)
 {
-
+    //this should be the correct push
 }
