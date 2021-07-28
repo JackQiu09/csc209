@@ -10,9 +10,8 @@ struct filematch *myglob(char *pat)
 {
     DIR *dp;
     struct dirent *p;
+    extern void insert(char *filename);
     extern int questionmatch(char *obj, char *pat, int n);
-    extern struct filematch *strcmalloc();
-    extern char *filemalloc(char *filename);
 
     if ((dp = opendir(".")) == NULL) {
         perror(".");
@@ -22,12 +21,36 @@ struct filematch *myglob(char *pat)
     if (strchr(pat, '*') == NULL) {
         while ((p = readdir(dp))) {
             if (questionmatch(p->d_name, pat, strlen(pat))) {
-                struct filematch *pt = strcmalloc();
-                pt->filename = filemalloc(p->d_name);
+                insert(p->d_name);
             }
         }
+        return head;
     } else {
+        while ((p = readdir(dp))) {
+            int index;
+            char *ptr;
+            ptr = strchr(pat, '*');
+            index = ptr - pat;
+            int n = strlen(pat) - 1;
+            int slen = strlen(p->d_name);
 
+            if (index == 0) {
+                if (questionmatch((p->d_name) + (slen - n), pat + 1, n)) {
+                    insert(p->d_name);
+                }
+            } else if (index == n) {
+                if (questionmatch(p->d_name, pat, index)) {
+                    insert(p->d_name);
+                }
+            } else {
+                int after = strlen(pat) - index - 1;
+                int i = index + 1;
+                if (questionmatch(p->d_name, pat, index) && questionmatch((p->d_name) + slen - after, pat + i, after)) {
+                    insert(p->d_name);
+                }
+            }
+        }
+        return head;
     }
     
     
@@ -35,31 +58,32 @@ struct filematch *myglob(char *pat)
     return head;
 }
 
-struct filematch *strcmalloc() {
-    struct filematch *pt;
-    pt = malloc(sizeof(struct filematch));
-    if (pt == NULL) {
+void insert(char *filename)
+{
+    struct filematch *new, **pp;
+
+    if ((new = malloc(sizeof(struct filematch))) == NULL) {
+        fprintf(stderr, "out of memory!\n");  /* unlikely */
+        exit(1);
+    }
+
+    if ((new->filename = malloc(strlen(filename) + 1)) == NULL) {
         fprintf(stderr, "out of memory\n");
         exit(1);
     }
-    return pt;
+
+    strcpy(new->filename, filename);
+
+    for (pp = &head; *pp; pp = &(*pp)->next)
+        ;
+    
+    new->next = *pp;
+    *pp = new;
 }
 
-char *filemalloc(char *filename) {
-    char *fn;
-    fn = malloc(strlen(filename) + 1);
-    if (fn == NULL) {
-        fprintf(stderr, "out of memory\n");
-        exit(1);
-    }
-    strcpy(fn, filename);
-    return fn;
-}
 
 int questionmatch(char *obj, char *pat, int n)
 {
-    if (n == 0)
-        return 1;
     if (strlen(obj) != strlen(pat)) 
         return 0;
     for (int i = 0; i < n; i++) {
@@ -72,7 +96,13 @@ int questionmatch(char *obj, char *pat, int n)
     return 1;
 }
 
+
 void freemyglob(struct filematch *pt)
 {
-    //this should be the correct push
+    struct filematch **p;
+
+    for (p = &head; *p; p = &(*p)->next) {
+        free((*p)->filename);
+        free(*p);
+    }
 }

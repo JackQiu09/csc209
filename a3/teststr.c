@@ -5,7 +5,7 @@
 
 int main()
 {
-    struct filematch *p;
+    /*struct filematch *p;
     char *s = "hello";
 
     p = malloc(sizeof(struct filematch));
@@ -26,6 +26,16 @@ int main()
 
     char *s1 = "helll";
     printf("%d\n", strncmp(s, s1, 5));
+    */
+
+    char *string = "qwerty";
+    char *ptr;
+    int index;
+
+    ptr = strchr(string, 'q');
+    index = ptr - string;
+    printf("%d\n", index);
+
 
     return(0);
 }
