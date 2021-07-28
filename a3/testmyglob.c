@@ -9,10 +9,9 @@ int main(int argc, char **argv)
     }
 
     struct filematch *p = myglob(argv[1]);
-    freemyglob(p); 
-    /*
+    /*freemyglob(p); */
+    
     for (; p; p = p->next)
 	printf("%s\n", p->filename);
-    */
     return(0);
 }

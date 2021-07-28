@@ -20,7 +20,7 @@ struct filematch *myglob(char *pat)
 
     if (strchr(pat, '*') == NULL) {
         while ((p = readdir(dp))) {
-            if (questionmatch(p->d_name, pat, strlen(pat))) {
+            if (strlen(p->d_name) == strlen(pat) && questionmatch(p->d_name, pat, strlen(pat))) {
                 insert(p->d_name);
             }
         }
@@ -33,20 +33,21 @@ struct filematch *myglob(char *pat)
             index = ptr - pat;
             int n = strlen(pat) - 1;
             int slen = strlen(p->d_name);
-
-            if (index == 0) {
-                if (questionmatch((p->d_name) + (slen - n), pat + 1, n)) {
-                    insert(p->d_name);
-                }
-            } else if (index == n) {
-                if (questionmatch(p->d_name, pat, index)) {
-                    insert(p->d_name);
-                }
-            } else {
-                int after = strlen(pat) - index - 1;
-                int i = index + 1;
-                if (questionmatch(p->d_name, pat, index) && questionmatch((p->d_name) + slen - after, pat + i, after)) {
-                    insert(p->d_name);
+            if (strlen(p->d_name) >= strlen(pat) - 1) {
+                if (index == 0) {
+                    if (questionmatch((p->d_name) + (slen - n), pat + 1, n)) {
+                        insert(p->d_name);
+                    }
+                } else if (index == n) {
+                    if (questionmatch(p->d_name, pat, index)) {
+                        insert(p->d_name);
+                    }
+                } else {
+                    int after = strlen(pat) - index - 1;
+                    int i = index + 1;
+                    if (questionmatch(p->d_name, pat, index) && questionmatch((p->d_name) + slen - after, pat + i, after)) {
+                        insert(p->d_name);
+                    }
                 }
             }
         }
@@ -85,8 +86,6 @@ void insert(char *filename)
 
 int questionmatch(char *obj, char *pat, int n)
 {
-    if (strlen(obj) != strlen(pat)) 
-        return 0;
     for (int i = 0; i < n; i++) {
         if (pat[i] == '?') {
             i++;

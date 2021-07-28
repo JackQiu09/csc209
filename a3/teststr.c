@@ -30,13 +30,10 @@ int main()
     */
 
     char *string = "qwerty";
-    char *ptr;
-    int index;
-
-    ptr = strchr(string, 'q');
-    index = ptr - string;
-    printf("%d\n", index);
-
+    char *ptr = string;
+    ptr += 1;
+    printf("%s\n", string);
+    printf("%s\n", ptr);
 
     return(0);
 }
