@@ -50,6 +50,7 @@ struct filematch *myglob(char *pat)
                 }
             }
         }
+        closedir(dp);
         return head;
     }
     
@@ -99,10 +100,11 @@ int questionmatch(char *obj, char *pat, int n)
 
 void freemyglob(struct filematch *pt)
 {
-    struct filematch **p;
-
-    for (p = &head; *p; p = &(*p)->next) {
-        free((*p)->filename);
-        free(*p);
+    while (pt) {
+        struct filematch *old = pt;
+        pt = pt->next;
+        free(old->filename);
+        free(old);
+        printf("struct freed\n");
     }
 }
